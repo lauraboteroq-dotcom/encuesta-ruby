@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Encuesta de Liderazgo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap">
+<style>
+  /* ============ CONFIGURACIÓN ============ */
+  /* (los ajustes están en el <script> CONFIG más abajo) */
+
+  :root {
+    --bg: #f7f3ee;
+    --card: #ffffff;
+    --ink: #2b2420;
+    --muted: #6f655e;
+    --line: #e6ddd3;
+    --accent: #a4462f;
+    --accent-ink: #ffffff;
+    --accent-soft: #f6e4dd;
+    --ok: #2f7a4f;
+    --err: #b3261e;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1917; --card: #262220; --ink: #f2ece6; --muted: #b3a89f;
+      --line: #3a3430; --accent: #e07a5f; --accent-ink: #1c1917; --accent-soft: #3b2a24;
+      --ok: #6cc690; --err: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1, h2 { font-family: Fraunces, Georgia, serif; font-weight: 600; line-height: 1.2; margin: 0 0 12px; }
+  h1 { font-size: clamp(28px, 6vw, 38px); }
+  h2 { font-size: 22px; }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--muted); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 18px;
+  }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .hidden { display: none !important; }
+
+  /* Botones y campos */
+  button, .btn {
+    font: inherit; font-weight: 600; border: 0; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink);
+    padding: 13px 22px; border-radius: 999px; text-decoration: none; display: inline-block;
+  }
+  button:disabled { opacity: .55; cursor: wait; }
+  .btn-ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  input[type=text], textarea {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  }
+  input[type=text] { text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+  textarea { min-height: 110px; resize: vertical; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row input { flex: 1 1 200px; }
+  .error { color: var(--err); font-size: 14px; margin-top: 10px; }
+
+  /* Escala 1–5 */
+  .legend { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .item { padding: 18px 0; border-top: 1px solid var(--line); }
+  .item:first-of-type { border-top: 0; padding-top: 4px; }
+  .item.missing .stmt { color: var(--err); }
+  .stmt { display: flex; gap: 10px; margin-bottom: 12px; font-weight: 500; }
+  .num { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 22px; }
+  .scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; border: 0; padding: 0; margin: 0; }
+  .scale input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale label {
+    display: grid; place-items: center; height: 46px; border-radius: 10px;
+    border: 1.5px solid var(--line); background: var(--bg); cursor: pointer;
+    font-weight: 600; font-variant-numeric: tabular-nums; transition: background .12s, border-color .12s;
+  }
+  .scale label:hover { border-color: var(--accent); }
+  .scale input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .scale input:focus-visible + label { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .q { margin-bottom: 22px; }
+  .q label { display: block; font-weight: 500; margin-bottom: 8px; }
+
+  /* Progreso */
+  .progress { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0 12px; margin-bottom: 8px; }
+  .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+  .progress small { color: var(--muted); font-size: 13px; }
+
+  .center { text-align: center; }
+  .big-check { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin: 0 auto 16px; font-size: 32px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- 1. Sin acceso (se entró sin el link completo) -->
+  <section id="pantalla-acceso" class="card hidden">
+    <div class="eyebrow">Encuesta de liderazgo en ventas</div>
+    <h1>Encuesta privada</h1>
+    <p class="muted">Esta encuesta solo se puede abrir desde el link que recibiste por mensaje. Vuelve a ese mensaje y tócalo directamente.</p>
+  </section>
+
+  <!-- 2. Encuesta -->
+  <form id="encuesta" class="hidden" novalidate>
+    <section class="card">
+      <div class="eyebrow">Encuesta de liderazgo en ventas · anónima</div>
+      <h1>¡Hola!</h1>
+      <p>Si estás recibiendo esta encuesta es porque hiciste parte de mi equipo de trabajo, o en general de mi carrera profesional, y tu feedback es muy valioso para mí. Por eso te invito a que respondas esta encuesta que te tomará 10 minutos, y será de gran impacto para mí.</p>
+      <p>Te agradezco tu tiempo y tu honestidad. <strong>Esta encuesta es anónima:</strong> no se guarda tu nombre, tu correo ni tu número.</p>
+    </section>
+
+    <div class="progress" aria-hidden="true">
+      <div class="bar"><div id="barra"></div></div>
+      <small id="progreso-txt">0 de 15 calificaciones</small>
+    </div>
+
+    <section class="card">
+      <h2>Parte 1 · Calificación</h2>
+      <p class="muted">Califica de 1 a 5 qué tan de acuerdo estás con cada frase. Marca una sola opción por fila.</p>
+      <div class="legend"><span>1 = nada de acuerdo</span><span>5 = totalmente de acuerdo</span></div>
+      <div id="items"></div>
+    </section>
+
+    <section class="card">
+      <h2>Parte 2 · Preguntas abiertas</h2>
+      <p class="muted">Escribe con libertad. Puedes dejar en blanco las que prefieras.</p>
+      <div id="abiertas"></div>
+    </section>
+
+    <div class="center">
+      <button type="submit" id="btn-enviar">Enviar respuestas</button>
+      <div id="error-envio" class="error hidden" role="alert"></div>
+    </div>
+  </form>
+
+  <!-- 3. Gracias -->
+  <section id="pantalla-gracias" class="card center hidden">
+    <div class="big-check">✓</div>
+    <h1>¡Gracias por tu tiempo y tu sinceridad!</h1>
+    <p class="muted" id="gracias-txt">Tus respuestas fueron enviadas de forma anónima.</p>
+  </section>
+
+</main>
+
+<script>
+/* ======================= CONFIGURACIÓN =======================
+   CORREO: a dónde llegan las respuestas.
+   La primera vez que alguien envíe la encuesta, FormSubmit mandará
+   un correo de activación a esta dirección: hay que hacer clic en
+   "Activate Form" una sola vez. (Ver LEEME.md)                     */
+const CONFIG = {
+  CORREO: "tierracurvalunar@gmail.com",
+  ASUNTO: "Nueva respuesta – Encuesta de liderazgo",
+  SAL: "encuesta-ruby-2026",
+  // Huella de la llave secreta que va en el link (?k=...). La llave misma no aparece aquí.
+  LLAVE_HASH: "19c65ced37bd23d818eb24a968c22c9d1e1898a55c5add0256aad27bce19e7eb"
+};
+
+const AFIRMACIONES = [
+  "Ruby sabe vender y enseñar a vender.",
+  "Ruby negocia bien y consigue buenos acuerdos.",
+  "Ruby entiende los números del negocio y los explica con claridad.",
+  "Ruby sabe liderar un equipo hacia una meta.",
+  "Ruby escucha antes de dar una opinión.",
+  "Ruby hace preguntas que me ayudaron a pensar mejor.",
+  "Ruby dice las cosas difíciles con respeto.",
+  "Ruby tiene paciencia para enseñar.",
+  "Ruby me dejaba tomar decisiones y aprender de ellas.",
+  "Ruby explica las cosas de forma sencilla.",
+  "Ruby me dio herramientas que todavía uso.",
+  "Ruby manejaba bien los conflictos.",
+  "Ruby es confiable y discreta.",
+  "Ruby controla sus emociones bajo presión.",
+  "Ruby se adapta a los cambios y a lo nuevo."
+];
+const ABIERTAS = [
+  "¿Cuál es la mayor fortaleza de Ruby?",
+  "¿En qué debería mejorar Ruby?",
+  "¿Qué aprendiste de Ruby que todavía aplicas?",
+  "¿Aportaba realmente al cumplimiento de tu meta?",
+  "¿Qué concepto tenían los clientes sobre su desempeño y apoyo?"
+];
+
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+/* ---------- Construir el formulario ---------- */
+AFIRMACIONES.forEach((txt, i) => {
+  const n = i + 1;
+  const div = document.createElement("div");
+  div.className = "item";
+  div.id = "item-" + n;
+  let opciones = "";
+  for (let v = 1; v <= 5; v++) {
+    opciones += `<input type="radio" id="p${n}-${v}" name="p${n}" value="${v}"><label for="p${n}-${v}">${v}</label>`;
+  }
+  div.innerHTML = `<div class="stmt" id="t${n}"><span class="num">${n}.</span><span>${txt}</span></div>
+    <fieldset class="scale" aria-labelledby="t${n}">${opciones}</fieldset>`;
+  $("items").appendChild(div);
+});
+ABIERTAS.forEach((txt, i) => {
+  const n = AFIRMACIONES.length + i + 1;
+  const div = document.createElement("div");
+  div.className = "q";
+  div.innerHTML = `<label for="p${n}">${n}. ${txt}</label><textarea id="p${n}" name="p${n}" maxlength="3000"></textarea>`;
+  $("abiertas").appendChild(div);
+});
+
+/* ---------- Acceso ---------- */
+async function sha256(texto) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function verificarAcceso() {
+  const llave = (new URLSearchParams(location.search).get("k") || "").trim().toLowerCase();
+  const h = llave ? await sha256(CONFIG.SAL + llave) : "";
+  if (h !== CONFIG.LLAVE_HASH) { mostrar("pantalla-acceso"); return; }
+  // Evita envíos repetidos desde el mismo navegador.
+  if (store.get("enviado")) {
+    mostrar("pantalla-gracias");
+    $("gracias-txt").textContent = "Esta encuesta ya fue respondida desde este dispositivo. ¡Gracias!";
+    return;
+  }
+  mostrar("encuesta");
+}
+function mostrar(id) {
+  ["pantalla-acceso", "encuesta", "pantalla-gracias"].forEach(x => $(x).classList.toggle("hidden", x !== id));
+}
+verificarAcceso();
+
+/* ---------- Progreso ---------- */
+function respondidas() {
+  return AFIRMACIONES.filter((_, i) => document.querySelector(`input[name=p${i + 1}]:checked`)).length;
+}
+$("encuesta").addEventListener("change", (e) => {
+  const r = respondidas();
+  $("barra").style.width = (r / AFIRMACIONES.length * 100) + "%";
+  $("progreso-txt").textContent = `${r} de ${AFIRMACIONES.length} calificaciones`;
+  const item = e.target.closest(".item");
+  if (item) item.classList.remove("missing");
+});
+
+/* ---------- Envío ---------- */
+function recogerRespuestas() {
+  const datos = {};
+  AFIRMACIONES.forEach((txt, i) => {
+    const sel = document.querySelector(`input[name=p${i + 1}]:checked`);
+    datos[`${String(i + 1).padStart(2, "0")}. ${txt}`] = sel ? sel.value : "";
+  });
+  ABIERTAS.forEach((txt, i) => {
+    const n = AFIRMACIONES.length + i + 1;
+    datos[`${n}. ${txt}`] = $("p" + n).value.trim() || "(sin respuesta)";
+  });
+  return datos;
+}
+function comoTexto(datos) {
+  const notas = AFIRMACIONES.map((_, i) => Number(Object.values(datos)[i]));
+  const promedio = (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(2);
+  return Object.entries(datos).map(([k, v]) => `${k}\n→ ${v}`).join("\n\n") + `\n\nPromedio de calificaciones: ${promedio}`;
+}
+
+$("encuesta").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEnvio = $("error-envio");
+  errEnvio.classList.add("hidden");
+
+  const faltan = AFIRMACIONES.map((_, i) => i + 1).filter(n => !document.querySelector(`input[name=p${n}]:checked`));
+  if (faltan.length) {
+    faltan.forEach(n => $("item-" + n).classList.add("missing"));
+    errEnvio.textContent = `Te falta calificar: ${faltan.join(", ")}.`;
+    errEnvio.classList.remove("hidden");
+    $("item-" + faltan[0]).scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  const datos = recogerRespuestas();
+  const texto = comoTexto(datos);
+  const btn = $("btn-enviar");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+
+  let ok = false, mensaje = "";
+  try {
+    const r = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CONFIG.CORREO), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(Object.assign({
+        _subject: CONFIG.ASUNTO,
+        _template: "box",
+        _captcha: "false",
+        "Promedio": texto.split("Promedio de calificaciones: ")[1]
+      }, datos))
+    });
+    const j = await r.json().catch(() => ({}));
+    ok = r.ok && String(j.success) === "true";
+    mensaje = String(j.message || "");
+  } catch (err) { ok = false; }
+
+  if (ok) {
+    store.set("enviado", "1");
+    mostrar("pantalla-gracias");
+    window.scrollTo(0, 0);
+    return;
+  }
+  // Si falla, las respuestas se quedan en pantalla para reintentar. Nunca se envían desde el correo de la persona.
+  btn.disabled = false;
+  btn.textContent = "Intentar de nuevo";
+  errEnvio.textContent = /activ/i.test(mensaje)
+    ? "La encuesta todavía no está activada. Ruby debe abrir el correo de FormSubmit y hacer clic en “Activate Form”. Luego toca “Intentar de nuevo”."
+    : "No pudimos enviar tus respuestas. Revisa tu conexión a internet y toca “Intentar de nuevo”.";
+  errEnvio.classList.remove("hidden");
+});
+</script>
+</body>
+</html>
